@@ -26,6 +26,7 @@ public class MainActivity extends Activity {
 	private TextView et;
 	private MyReceiver receiver;
 	private IntentFilter filter;
+	Jedis jedis = new Jedis("192.168.103.18");
 	String value="";
 	@Override
 	public void onDestroy() {
@@ -36,9 +37,9 @@ public class MainActivity extends Activity {
 
 	public void refreshText()
 	{
-		Jedis jedis = new Jedis("192.168.103.18");
-		jedis.auth("123456redis");
+		
 		value = jedis.lpop("forpass");
+		
 		if(value!=null && !value.trim().equals(""))
 		{
 			this.et.setText(value);
@@ -52,10 +53,11 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		Jedis jedis = new Jedis("192.168.103.18");
+		
 		jedis.auth("123456redis");
 		value = jedis.lpop("forpass");
-		 
+		
+		System.out.println("after redis connect");
 		receiver = new MyReceiver();
 		filter = new IntentFilter();
 		filter.addAction("android.intent.action.MY_RECEIVER");
@@ -77,9 +79,11 @@ public class MainActivity extends Activity {
 		this.pass.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
-				Jedis jedis = new Jedis("192.168.103.18");
-				jedis.auth("123456redis");
-				jedis.sadd("passed", value);
+//				Jedis jedis = new Jedis("192.168.103.18");
+//				jedis.auth("123456redis");
+				jedis.rpush("passed_1", value);
+				System.out.println("ss "+ value);
+				jedis.disconnect();
 			}
 
 		});
@@ -103,8 +107,11 @@ public class MainActivity extends Activity {
 			}
 
 		});
+		
 	}
 
+	
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
